@@ -1,0 +1,72 @@
+<!-- Container de Notificações -->
+<div class="notificacoes-container" [class.notificacoes-container--vazio]="!temNotificacoes()">
+  
+  <!-- Lista de Notificações -->
+  <div class="notificacoes-lista" *ngIf="temNotificacoes()">
+    <div 
+      *ngFor="let notificacao of notificacoes; trackBy: trackByNotificacao"
+      [ngClass]="obterClasseCSS(notificacao.tipo)"
+      class="notificacao-item"
+    >
+      <!-- Ícone da Notificação -->
+      <div class="notificacao__icone">
+        <span class="icone">{{ obterIcone(notificacao.tipo) }}</span>
+      </div>
+
+      <!-- Conteúdo da Notificação -->
+      <div class="notificacao__conteudo">
+        <div class="notificacao__cabecalho">
+          <h4 class="notificacao__titulo">{{ notificacao.titulo }}</h4>
+          <span class="notificacao__tempo">{{ formatarTempo(notificacao.timestamp) }}</span>
+        </div>
+        
+        <p class="notificacao__mensagem">{{ notificacao.mensagem }}</p>
+        
+        <!-- Ação da Notificação -->
+        <div class="notificacao__acoes" *ngIf="notificacao.acao">
+          <button 
+            type="button"
+            class="btn btn--acao"
+            (click)="executarAcao(notificacao)"
+          >
+            {{ notificacao.acao.texto }}
+          </button>
+        </div>
+      </div>
+
+      <!-- Botão Fechar -->
+      <button 
+        type="button"
+        class="notificacao__fechar"
+        (click)="fecharNotificacao(notificacao.id)"
+        aria-label="Fechar notificação"
+      >
+        <span class="icone-fechar">×</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Botão Limpar Todas (quando há notificações) -->
+  <div class="notificacoes-acoes" *ngIf="temNotificacoes() && notificacoes.length > 1">
+    <button 
+      type="button"
+      class="btn btn--limpar"
+      (click)="limparTodas()"
+    >
+      Limpar todas
+    </button>
+  </div>
+
+  <!-- Estado Vazio -->
+  <div class="notificacoes-vazio" *ngIf="!temNotificacoes()">
+    <div class="vazio__icone">📭</div>
+    <p class="vazio__mensagem">Nenhuma notificação</p>
+  </div>
+</div>
+
+<!-- Overlay para Mobile (opcional) -->
+<div 
+  class="notificacoes-overlay" 
+  *ngIf="temNotificacoes()"
+  (click)="limparTodas()"
+></div>

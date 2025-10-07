@@ -1,0 +1,69 @@
+<div class="container mt-4">
+  <h2>Cursos Disponíveis</h2>
+  
+  <!-- Barra de pesquisa -->
+  <div class="row mb-4">
+    <div class="col-md-6">
+      <div class="input-group">
+        <input 
+          type="text" 
+          class="form-control" 
+          placeholder="Pesquisar cursos..." 
+          [(ngModel)]="searchTerm"
+        >
+        <div class="input-group-append">
+          <button class="btn btn-primary" type="button">
+            <i class="bi bi-search"></i> Buscar
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mensagem de carregamento -->
+  <div *ngIf="loading" class="text-center my-5">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Carregando...</span>
+    </div>
+    <p class="mt-2">Carregando cursos...</p>
+  </div>
+
+  <!-- Mensagem de erro -->
+  <div *ngIf="error" class="alert alert-danger">
+    {{ error }}
+  </div>
+
+  <!-- Lista de cursos -->
+  <div *ngIf="!loading && cursosFiltrados.length > 0" class="row">
+    <div *ngFor="let curso of cursosFiltrados" class="col-md-4 mb-4">
+      <div class="card h-100">
+        <div class="card-body">
+          <h5 class="card-title">{{ curso.titulo }}</h5>
+          <p class="card-text">{{ curso.descricao }}</p>
+          <p class="card-text"><small class="text-muted">Professor: {{ curso.professor.nome }}</small></p>
+        </div>
+        <div class="card-footer bg-white border-top-0">
+          <div class="d-flex justify-content-between align-items-center">
+            <a [routerLink]="['/cursos', curso.id]" class="btn btn-outline-primary">Ver Detalhes</a>
+            
+            <!-- Botão de matrícula para estudantes -->
+            <button 
+              *ngIf="userType === 'estudante'" 
+              class="btn" 
+              [ngClass]="isMatriculado(curso.id) ? 'btn-success' : 'btn-primary'"
+              [disabled]="isMatriculado(curso.id)"
+              (click)="matricular(curso.id)"
+            >
+              {{ isMatriculado(curso.id) ? 'Matriculado' : 'Matricular' }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mensagem quando não há cursos -->
+  <div *ngIf="!loading && cursosFiltrados.length === 0" class="alert alert-info">
+    Nenhum curso encontrado.
+  </div>
+</div>

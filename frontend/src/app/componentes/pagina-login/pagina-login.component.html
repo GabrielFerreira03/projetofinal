@@ -1,0 +1,127 @@
+<div class="container-login">
+  <div class="card-login">
+    <div class="cabecalho-login">
+      <h1 class="titulo">EduNext</h1>
+      <p class="subtitulo">Faça login para continuar sua jornada de aprendizado</p>
+    </div>
+
+    <!-- Mensagens de feedback -->
+    <div *ngIf="erro" class="alerta alerta-erro">
+      <i class="icone-erro">⚠️</i>
+      {{ erro }}
+    </div>
+
+    <div *ngIf="sucesso" class="alerta alerta-sucesso">
+      <i class="icone-sucesso">✅</i>
+      {{ sucesso }}
+    </div>
+
+    <!-- Formulário de login -->
+    <form [formGroup]="formularioLogin" (ngSubmit)="onSubmit()" class="formulario-login">
+      <!-- Campo Email -->
+      <div class="grupo-campo">
+        <label for="email" class="rotulo">Email</label>
+        <div class="container-input">
+          <input
+            type="email"
+            id="email"
+            formControlName="email"
+            class="campo-input"
+            [class.campo-erro]="emailInvalido"
+            placeholder="Digite seu email"
+            autocomplete="email"
+          />
+          <i class="icone-campo">📧</i>
+        </div>
+        <div *ngIf="emailInvalido" class="mensagem-erro">
+          {{ obterErroEmail() }}
+        </div>
+      </div>
+
+      <!-- Campo Senha -->
+      <div class="grupo-campo">
+        <label for="senha" class="rotulo">Senha</label>
+        <div class="container-input">
+          <input
+            [type]="mostrarSenha ? 'text' : 'password'"
+            id="senha"
+            formControlName="senha"
+            class="campo-input"
+            [class.campo-erro]="senhaInvalida"
+            placeholder="Digite sua senha"
+            autocomplete="current-password"
+          />
+          <button
+            type="button"
+            class="botao-mostrar-senha"
+            (click)="alternarVisibilidadeSenha()"
+            [attr.aria-label]="mostrarSenha ? 'Ocultar senha' : 'Mostrar senha'"
+          >
+            {{ mostrarSenha ? '🙈' : '👁️' }}
+          </button>
+        </div>
+        <div *ngIf="senhaInvalida" class="mensagem-erro">
+          {{ obterErroSenha() }}
+        </div>
+      </div>
+
+      <!-- Checkbox Lembrar-me -->
+      <div class="grupo-opcoes">
+        <label class="checkbox-container">
+          <input type="checkbox" formControlName="lembrarMe" />
+          <span class="checkmark"></span>
+          Lembrar-me
+        </label>
+        
+        <button
+          type="button"
+          class="link-recuperar"
+          (click)="navegarParaRecuperarSenha()"
+        >
+          Esqueceu a senha?
+        </button>
+      </div>
+
+      <!-- Botão de submit -->
+      <button
+        type="submit"
+        class="botao-login"
+        [disabled]="carregando || formularioLogin.invalid"
+        [class.carregando]="carregando"
+      >
+        <span *ngIf="!carregando">Entrar</span>
+        <span *ngIf="carregando" class="spinner">
+          <i class="icone-carregando">⏳</i>
+          Entrando...
+        </span>
+      </button>
+    </form>
+
+    <!-- Link para cadastro -->
+    <div class="rodape-login">
+      <p>
+        Não tem uma conta?
+        <button
+          type="button"
+          class="link-cadastro"
+          (click)="navegarParaCadastro()"
+        >
+          Cadastre-se aqui
+        </button>
+      </p>
+    </div>
+
+    <!-- Informações adicionais -->
+    <div class="info-adicional">
+      <h3>Acesse conteúdos sobre:</h3>
+      <div class="tags-conteudo">
+        <span class="tag">Lógica de Programação</span>
+        <span class="tag">HTML, CSS e JavaScript</span>
+        <span class="tag">Angular com TypeScript</span>
+        <span class="tag">Git</span>
+        <span class="tag">Scrum</span>
+        <span class="tag">Banco de Dados</span>
+      </div>
+    </div>
+  </div>
+</div>

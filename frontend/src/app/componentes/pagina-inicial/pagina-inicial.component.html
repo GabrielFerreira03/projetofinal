@@ -1,0 +1,227 @@
+<!-- Hero Section -->
+<section class="hero">
+  <div class="container">
+    <div class="hero-content">
+      <div class="hero-text">
+        <h1 class="hero-titulo">
+          Transforme sua carreira com
+          <span class="destaque">EduNext</span>
+        </h1>
+        <p class="hero-subtitulo">
+          Aprenda as tecnologias mais demandadas do mercado com nossos cursos práticos e atualizados.
+          Do básico ao avançado, temos o conteúdo ideal para sua jornada profissional.
+        </p>
+        
+        <div class="hero-acoes" *ngIf="!usuarioLogado">
+          <button class="botao-primario" (click)="navegarParaCadastro()">
+            Começar Agora
+          </button>
+          <button class="botao-secundario" (click)="navegarParaLogin()">
+            Já tenho conta
+          </button>
+        </div>
+
+        <div class="hero-acoes" *ngIf="usuarioLogado">
+          <button class="botao-primario" (click)="navegarParaCursos()">
+            Continuar Aprendendo
+          </button>
+          <p class="boas-vindas">Bem-vindo de volta, {{ nomeUsuario }}! 👋</p>
+        </div>
+      </div>
+
+      <div class="hero-imagem">
+        <div class="ilustracao-hero">
+          <div class="icone-principal">🎓</div>
+          <div class="elementos-flutuantes">
+            <span class="elemento elemento-1">💻</span>
+            <span class="elemento elemento-2">📚</span>
+            <span class="elemento elemento-3">🚀</span>
+            <span class="elemento elemento-4">⚡</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Estatísticas -->
+<section class="estatisticas">
+  <div class="container">
+    <div class="grid-estatisticas">
+      <div class="card-estatistica">
+        <div class="numero">{{ formatarNumero(estatisticas.totalEstudantes) }}+</div>
+        <div class="label">Estudantes</div>
+      </div>
+      <div class="card-estatistica">
+        <div class="numero">{{ estatisticas.totalCursos }}+</div>
+        <div class="label">Cursos</div>
+      </div>
+      <div class="card-estatistica">
+        <div class="numero">{{ estatisticas.totalProfessores }}+</div>
+        <div class="label">Professores</div>
+      </div>
+      <div class="card-estatistica">
+        <div class="numero">{{ formatarNumero(estatisticas.horasConteudo) }}h</div>
+        <div class="label">de Conteúdo</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Categorias -->
+<section id="categorias" class="categorias">
+  <div class="container">
+    <div class="secao-header">
+      <h2>Conteúdos Formativos</h2>
+      <p>Explore nossas áreas de conhecimento especializadas</p>
+    </div>
+
+    <div class="grid-categorias">
+      <div 
+        *ngFor="let categoria of categorias" 
+        class="card-categoria"
+        (click)="navegarParaCategoria(categoria.categoria)"
+      >
+        <div class="icone-categoria">{{ categoria.icone }}</div>
+        <h3>{{ categoria.nome }}</h3>
+        <p>{{ categoria.descricao }}</p>
+        <div class="seta">→</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Cursos em Destaque -->
+<section id="cursos-destaque" class="cursos-destaque">
+  <div class="container">
+    <div class="secao-header">
+      <h2>Cursos em Destaque</h2>
+      <p>Os cursos mais populares da nossa plataforma</p>
+    </div>
+
+    <div *ngIf="carregando" class="carregando">
+      <div class="spinner">⏳</div>
+      <p>Carregando cursos...</p>
+    </div>
+
+    <div *ngIf="erro" class="erro">
+      <p>{{ erro }}</p>
+      <button class="botao-tentar-novamente" (click)="carregarDados()">
+        Tentar Novamente
+      </button>
+    </div>
+
+    <div *ngIf="!carregando && !erro" class="grid-cursos">
+      <div 
+        *ngFor="let curso of cursosDestaque" 
+        class="card-curso"
+        (click)="navegarParaCurso(curso.id)"
+      >
+        <div class="imagem-curso">
+          <img [src]="curso.imagemCapa" [alt]="curso.titulo" />
+          <div class="badge-nivel">{{ curso.nivel }}</div>
+        </div>
+        
+        <div class="conteudo-curso">
+          <h3>{{ curso.titulo }}</h3>
+          <p class="descricao">{{ curso.descricao }}</p>
+          
+          <div class="info-curso">
+            <div class="professor">
+              <span class="icone">👨‍🏫</span>
+              {{ curso.professor.nome }}
+            </div>
+            <div class="duracao">
+              <span class="icone">⏱️</span>
+              {{ curso.duracao }}h
+            </div>
+          </div>
+          
+          <div class="rodape-curso">
+            <div class="avaliacao">
+              <span class="estrelas">
+                <span *ngFor="let estrela of obterEstrelas(curso.avaliacaoMedia)">
+                  {{ estrela }}
+                </span>
+              </span>
+              <span class="nota">{{ curso.avaliacaoMedia.toFixed(1) }}</span>
+            </div>
+            <div class="preco">
+              <span *ngIf="curso.promocao?.ativa" class="preco-original">
+                R$ {{ curso.preco.toFixed(2) }}
+              </span>
+              <span class="preco-atual">
+                R$ {{ curso.promocao?.ativa ? 
+                  (curso.preco * (1 - curso.promocao.desconto / 100)).toFixed(2) : 
+                  curso.preco.toFixed(2) 
+                }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="ver-todos">
+      <button class="botao-ver-todos" (click)="navegarParaCursos()">
+        Ver Todos os Cursos
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- Depoimentos -->
+<section id="depoimentos" class="depoimentos">
+  <div class="container">
+    <div class="secao-header">
+      <h2>O que nossos alunos dizem</h2>
+      <p>Histórias reais de transformação profissional</p>
+    </div>
+
+    <div class="grid-depoimentos">
+      <div *ngFor="let depoimento of depoimentos" class="card-depoimento">
+        <div class="aspas">"</div>
+        <p class="texto-depoimento">{{ depoimento.texto }}</p>
+        
+        <div class="avaliacao-depoimento">
+          <span *ngFor="let estrela of obterEstrelas(depoimento.nota)" class="estrela">
+            {{ estrela }}
+          </span>
+        </div>
+        
+        <div class="autor-depoimento">
+          <div class="foto-autor">{{ depoimento.foto }}</div>
+          <div class="info-autor">
+            <div class="nome-autor">{{ depoimento.nome }}</div>
+            <div class="cargo-autor">{{ depoimento.cargo }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Call to Action -->
+<section class="cta">
+  <div class="container">
+    <div class="cta-content">
+      <h2>Pronto para começar sua jornada?</h2>
+      <p>Junte-se a milhares de profissionais que já transformaram suas carreiras</p>
+      
+      <div class="cta-acoes" *ngIf="!usuarioLogado">
+        <button class="botao-cta-primario" (click)="navegarParaCadastro()">
+          Criar Conta Gratuita
+        </button>
+        <button class="botao-cta-secundario" (click)="scrollParaSecao('categorias')">
+          Explorar Conteúdos
+        </button>
+      </div>
+
+      <div class="cta-acoes" *ngIf="usuarioLogado">
+        <button class="botao-cta-primario" (click)="navegarParaCursos()">
+          Explorar Cursos
+        </button>
+      </div>
+    </div>
+  </div>
+</section>

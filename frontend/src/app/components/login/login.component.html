@@ -1,0 +1,65 @@
+<div class="row justify-content-center">
+  <div class="col-md-6">
+    <div class="card shadow">
+      <div class="card-header bg-primary text-white">
+        <h4 class="mb-0">Entrar na Plataforma</h4>
+      </div>
+      <div class="card-body">
+        <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+          <div class="alert alert-danger" *ngIf="erro">
+            {{ erro }}
+          </div>
+          
+          <div class="mb-3">
+            <label for="email" class="form-label">Email</label>
+            <input 
+              type="email" 
+              class="form-control" 
+              id="email" 
+              formControlName="email"
+              [ngClass]="{'is-invalid': loginForm.get('email')?.invalid && loginForm.get('email')?.touched}"
+            >
+            <div class="invalid-feedback" *ngIf="loginForm.get('email')?.errors?.['required']">
+              Email é obrigatório
+            </div>
+            <div class="invalid-feedback" *ngIf="loginForm.get('email')?.errors?.['email']">
+              Formato de email inválido
+            </div>
+          </div>
+          
+          <div class="mb-3">
+            <label for="senha" class="form-label">Senha</label>
+            <input 
+              type="password" 
+              class="form-control" 
+              id="senha" 
+              formControlName="senha"
+              [ngClass]="{'is-invalid': loginForm.get('senha')?.invalid && loginForm.get('senha')?.touched}"
+            >
+            <div class="invalid-feedback" *ngIf="loginForm.get('senha')?.errors?.['required']">
+              Senha é obrigatória
+            </div>
+            <div class="invalid-feedback" *ngIf="loginForm.get('senha')?.errors?.['minlength']">
+              Senha deve ter pelo menos 6 caracteres
+            </div>
+          </div>
+          
+          <div class="d-grid gap-2">
+            <button 
+              type="submit" 
+              class="btn btn-primary" 
+              [disabled]="loginForm.invalid || carregando"
+            >
+              <span *ngIf="carregando" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+              Entrar
+            </button>
+          </div>
+        </form>
+        
+        <div class="mt-3 text-center">
+          <p>Não tem uma conta? <a routerLink="/cadastro">Cadastre-se</a></p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

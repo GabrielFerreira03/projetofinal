@@ -1,0 +1,106 @@
+<div class="container mt-4">
+  <!-- Loading indicator -->
+  <div *ngIf="loading" class="text-center my-5">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Carregando...</span>
+    </div>
+    <p class="mt-2">Carregando detalhes do curso...</p>
+  </div>
+
+  <!-- Error message -->
+  <div *ngIf="error" class="alert alert-danger">
+    {{ error }}
+  </div>
+
+  <!-- Course details -->
+  <div *ngIf="!loading && curso">
+    <div class="row mb-4">
+      <div class="col-md-8">
+        <h2>{{ curso.titulo }}</h2>
+        <p class="lead">{{ curso.descricao }}</p>
+        <p><strong>Professor:</strong> {{ curso.professor.nome }}</p>
+      </div>
+      <div class="col-md-4" *ngIf="userType === 'estudante'">
+        <div class="card">
+          <div class="card-body">
+            <h5 class="card-title">Seu progresso</h5>
+            <div class="progress mb-3">
+              <div class="progress-bar" role="progressbar" [style.width.%]="calcularProgressoCurso()" 
+                   [attr.aria-valuenow]="calcularProgressoCurso()" aria-valuemin="0" aria-valuemax="100">
+                {{ calcularProgressoCurso() }}%
+              </div>
+            </div>
+            <p class="card-text">Continue aprendendo para completar o curso!</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <!-- Module navigation -->
+      <div class="col-md-3">
+        <div class="list-group">
+          <a *ngFor="let modulo of curso.modulos" 
+             (click)="selecionarModulo(modulo)"
+             class="list-group-item list-group-item-action"
+             [class.active]="moduloAtivo?.id === modulo.id">
+            <div class="d-flex w-100 justify-content-between">
+              <h6 class="mb-1">{{ modulo.titulo }}</h6>
+              <span *ngIf="userType === 'estudante'" class="badge bg-primary rounded-pill">
+                {{ calcularProgressoModulo(modulo) }}%
+              </span>
+            </div>
+          </a>
+        </div>
+      </div>
+
+      <!-- Content area -->
+      <div class="col-md-9">
+        <div class="card">
+          <div class="card-header">
+            <ul class="nav nav-tabs card-header-tabs" *ngIf="moduloAtivo">
+              <li class="nav-item" *ngFor="let conteudo of moduloAtivo.conteudos">
+                <a class="nav-link" 
+                   [class.active]="conteudoAtivo?.id === conteudo.id"
+                   (click)="selecionarConteudo(conteudo)">
+                  {{ conteudo.titulo }}
+                  <i *ngIf="conteudoVisualizado(conteudo.id)" class="bi bi-check-circle-fill text-success ms-1"></i>
+                </a>
+              </li>
+            </ul>
+          </div>
+          <div class="card-body">
+            <div *ngIf="conteudoAtivo">
+              <h5 class="card-title">{{ conteudoAtivo.titulo }}</h5>
+              
+              <!-- Video content -->
+              <div *ngIf="conteudoAtivo.tipo === 'video'" class="ratio ratio-16x9 mb-3">
+                <iframe [src]="conteudoAtivo.url | safe" allowfullscreen></iframe>
+              </div>
+              
+              <!-- Document content -->
+              <div *ngIf="conteudoAtivo.tipo === 'documento'" class="mb-3">
+                <p>{{ conteudoAtivo.descricao }}</p>
+                <a [href]="conteudoAtivo.url" target="_blank" class="btn btn-outline-primary">
+                  <i class="bi bi-file-earmark-text"></i> Abrir documento
+                </a>
+              </div>
+              
+              <!-- Quiz content -->
+              <div *ngIf="conteudoAtivo.tipo === 'quiz'" class="mb-3">
+                <p>{{ conteudoAtivo.descricao }}</p>
+                <a [routerLink]="['/quiz', conteudoAtivo.id]" class="btn btn-outline-primary">
+                  <i class="bi bi-question-circle"></i> Iniciar quiz
+                </a>
+              </div>
+            </div>
+            
+            <div *ngIf="!conteudoAtivo" class="text-center my-5">
+              <p>Selecione um conteúdo para visualizar.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
