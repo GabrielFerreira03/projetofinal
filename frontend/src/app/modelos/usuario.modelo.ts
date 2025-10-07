@@ -1,8 +1,10 @@
+export type TipoUsuario = 'estudante' | 'professor' | 'administrador';
+
 export interface Usuario {
   id: string;
   nome: string;
   email: string;
-  tipo: 'estudante' | 'professor';
+  tipo: TipoUsuario;
   dataCriacao: Date;
   ultimoAcesso?: Date;
   perfil?: PerfilUsuario;
@@ -44,7 +46,7 @@ export interface ConfiguracoesUsuario {
 }
 
 export interface Estudante extends Usuario {
-  tipo: 'estudante';
+  tipo: TipoUsuario;
   cursosMatriculados: string[]; // IDs dos cursos
   progressoCursos: ProgressoCurso[];
   certificados: Certificado[];
@@ -52,7 +54,7 @@ export interface Estudante extends Usuario {
 }
 
 export interface Professor extends Usuario {
-  tipo: 'professor';
+  tipo: TipoUsuario;
   especialidades: string[];
   cursosMinistrados: string[]; // IDs dos cursos
   avaliacaoMedia: number;

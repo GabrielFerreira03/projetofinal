@@ -48,7 +48,7 @@ export interface EstatisticasCurso {
   providedIn: 'root'
 })
 export class CursoServico {
-  private readonly API_URL = 'http://localhost:3000/api';
+  private readonly API_URL = 'http://localhost:3002/api';
   private cursosSubject = new BehaviorSubject<Curso[]>([]);
   private cursoAtualSubject = new BehaviorSubject<Curso | null>(null);
   private progressoSubject = new BehaviorSubject<ProgressoCurso[]>([]);

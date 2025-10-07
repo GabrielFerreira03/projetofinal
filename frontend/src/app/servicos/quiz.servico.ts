@@ -37,7 +37,7 @@ export interface EstadoQuiz {
   providedIn: 'root'
 })
 export class QuizServico {
-  private readonly API_URL = 'http://localhost:3000/api';
+  private readonly API_URL = 'http://localhost:3002/api';
   private quizzesSubject = new BehaviorSubject<Quiz[]>([]);
   private estadoQuizSubject = new BehaviorSubject<EstadoQuiz | null>(null);
   private tentativasSubject = new BehaviorSubject<TentativaQuiz[]>([]);

@@ -1,7 +1,7 @@
 // Teste de conectividade com API
 class APITester {
     constructor() {
-        this.baseURL = 'http://localhost:3000';
+        this.baseURL = 'http://localhost:3002';
         this.results = [];
     }
 
@@ -181,45 +181,4 @@ class APITester {
 // Criar instância global
 window.apiTester = new APITester();
 
-// Adicionar botão de teste na interface
-function addAPITestButton() {
-    const button = document.createElement('button');
-    button.innerHTML = '🔍 Testar APIs';
-    button.style.cssText = `
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        border: none;
-        padding: 12px 20px;
-        border-radius: 25px;
-        cursor: pointer;
-        font-weight: bold;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-        z-index: 1000;
-        transition: all 0.3s ease;
-        font-size: 14px;
-    `;
-    
-    button.onmouseover = () => {
-        button.style.transform = 'scale(1.05) translateY(-2px)';
-        button.style.boxShadow = '0 6px 20px rgba(0,0,0,0.3)';
-    };
-    
-    button.onmouseout = () => {
-        button.style.transform = 'scale(1) translateY(0)';
-        button.style.boxShadow = '0 4px 15px rgba(0,0,0,0.2)';
-    };
-    
-    button.onclick = () => window.apiTester.runAllTests();
-    
-    document.body.appendChild(button);
-}
-
-// Adicionar o botão quando a página carregar
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', addAPITestButton);
-} else {
-    addAPITestButton();
-}
+// Removido botão de teste de APIs conforme solicitação do cliente.

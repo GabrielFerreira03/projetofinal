@@ -154,7 +154,7 @@ function EduNextApp() {
                 <div class="app-container">
                     <nav class="navbar">
                         <div class="nav-brand">
-                            <img src="src/assets/img/logofundoinvisivelazul.png" alt="Logo EduNext" class="logo-img">
+                            <img src="src/assets/img/logofundoinvisivel.png" alt="Logo EduNext" class="logo-img">
                             <h1>EduNext</h1>
                         </div>
                         <div class="nav-links">
@@ -298,7 +298,7 @@ function EduNextApp() {
                         checkbox.addEventListener('input', updateButtonState);
                         
                         // Verificação inicial
-                        this.updateButtonState();
+                        updateButtonState();
                         
                         console.log('Validação da checkbox configurada com sucesso');
                     } else {
@@ -309,7 +309,7 @@ function EduNextApp() {
             };
             
             // Inicializar validação
-            this.initCheckboxValidation();
+            initCheckboxValidation();
         }
     };
 
@@ -735,9 +735,51 @@ function EduNextApp() {
 
             try {
                 // Carregar dados da API
-                const response = await fetch('http://localhost:3000/api/cursos');
+                const response = await fetch('http://localhost:3002/api/cursos');
                 const data = await response.json();
-                const cursos = data.cursos || [];
+                let cursos = Array.isArray(data) ? data : (data.cursos || []);
+
+                // Fallback local: se a API retornar vazia, exibir cursos de exemplo
+                if (!Array.isArray(cursos) || cursos.length === 0) {
+                    cursos = [
+                        {
+                            id: 'curso-logica',
+                            titulo: 'Lógica de Programação',
+                            descricao: 'Fundamentos de lógica e pensamento computacional.',
+                            categoria: 'Lógica de Programação',
+                            nivel: 'basico',
+                            duracao: '10h',
+                            instrutor: 'Equipe EduNext'
+                        },
+                        {
+                            id: 'curso-html-css',
+                            titulo: 'HTML & CSS',
+                            descricao: 'Crie páginas web modernas com HTML e CSS.',
+                            categoria: 'HTML & CSS',
+                            nivel: 'basico',
+                            duracao: '12h',
+                            instrutor: 'Equipe EduNext'
+                        },
+                        {
+                            id: 'curso-javascript',
+                            titulo: 'JavaScript',
+                            descricao: 'Programação com JavaScript do básico ao avançado.',
+                            categoria: 'JavaScript',
+                            nivel: 'intermediario',
+                            duracao: '16h',
+                            instrutor: 'Equipe EduNext'
+                        },
+                        {
+                            id: 'curso-angular',
+                            titulo: 'Angular',
+                            descricao: 'Desenvolva aplicações modernas com Angular.',
+                            categoria: 'Angular',
+                            nivel: 'intermediario',
+                            duracao: '20h',
+                            instrutor: 'Equipe EduNext'
+                        }
+                    ];
+                }
 
                 if (isLoggedIn) {
                     // Renderizar página com layout sidebar para usuários logados
@@ -818,7 +860,7 @@ function EduNextApp() {
                                                 </div>
                                                 <div class="course-actions">
                                                     <button class="btn-primary" onclick="app.startCourse('${curso.id}')">Começar Curso</button>
-                                                    <button class="btn-secondary" onclick="app.viewCourseDetails('${curso.id}')">Ver Detalhes</button>
+                                                    <button class="btn-secondary" onclick="app.viewCourseDetails(event, '${curso.id}')">Ver Detalhes</button>
                                                 </div>
                                             </div>
                                         `).join('')}
@@ -879,7 +921,7 @@ function EduNextApp() {
                                                 </div>
                                                 <div class="course-actions">
                                                     <button class="btn-primary" onclick="app.startCourse('${curso.id}')">Começar Curso</button>
-                                                    <button class="btn-secondary" onclick="app.viewCourseDetails('${curso.id}')">Ver Detalhes</button>
+                                                    <button class="btn-secondary" onclick="app.viewCourseDetails(event, '${curso.id}')">Ver Detalhes</button>
                                                 </div>
                                             </div>
                                         `).join('')}
@@ -963,7 +1005,7 @@ function EduNextApp() {
                         <div class="app-container">
                             <nav class="navbar">
                                 <div class="nav-brand">
-                                    <img src="src/assets/img/logofundoinvisivel.png" alt="Logo EduNext" class="logo-img">
+                                    <img src="src/assets/img/logofundoinvisivelazul.png" alt="Logo EduNext" class="logo-img">
                                     <h1>EduNext</h1>
                                 </div>
                                 <div class="nav-links">
@@ -991,16 +1033,12 @@ function EduNextApp() {
 
     this.getCourseIcon = function(categoria) {
         const icons = {
-            'Programação': '<img src="src/assets/img/logicapromacao.png" alt="Lógica de Programação" class="course-icon">',
-            'Web Development': '<img src="src/assets/img/html.png" alt="HTML & CSS" class="course-icon">',
-            'Framework': '<img src="src/assets/img/angular.png" alt="Angular" class="course-icon">',
+            'Lógica de Programação': '<img src="src/assets/img/logicapromacao.png" alt="Lógica de Programação" class="course-icon">',
+            'HTML & CSS': '<img src="src/assets/img/html.png" alt="HTML & CSS" class="course-icon">',
             'JavaScript': '<img src="src/assets/img/javascript.png" alt="JavaScript" class="course-icon">',
-            'Design': '🎨',
-            'Marketing': '📈',
-            'Data Science': '📊',
-            'Mobile': '📱'
+            'Angular': '<img src="src/assets/img/angular.png" alt="Angular" class="course-icon">'
         };
-        return icons[categoria] || '📚';
+        return icons[categoria] || '<img src="src/assets/img/logoprojetofinal.png" alt="Curso" class="course-icon">';
     };
 
     this.setupCourseFilters = function() {
@@ -1039,11 +1077,113 @@ function EduNextApp() {
     };
 
     this.startCourse = function(courseId) {
-        alert(`Iniciando curso ID: ${courseId}\n\nEsta funcionalidade será implementada em breve!`);
+        if (!this.isAuthenticated()) {
+            window.location.hash = '#/login';
+            this.loadLoginPage();
+            return;
+        }
+        alert(`Iniciando curso ID: ${courseId}`);
     };
 
-    this.viewCourseDetails = function(courseId) {
-        alert(`Visualizando detalhes do curso ID: ${courseId}\n\nEsta funcionalidade será implementada em breve!`);
+    this.viewCourseDetails = function(event, courseId) {
+        const coursesGrid = document.getElementById('coursesGrid');
+        if (!coursesGrid) return;
+
+        const courseCard = event?.target?.closest('.course-card') || Array.from(coursesGrid.querySelectorAll('.course-card')).find(card => card.querySelector('.btn-secondary')?.getAttribute('onclick')?.includes(`'${courseId}'`));
+        if (!courseCard) return;
+
+        const detailsById = {
+            'curso-logica': {
+                titulo: 'Lógica de Programação',
+                conteudo: [
+                    'Conceitos básicos: algoritmos, variáveis, operadores',
+                    'Estruturas de controle: if, else, switch',
+                    'Estruturas de repetição: for, while',
+                    'Introdução a funções e modularização'
+                ]
+            },
+            'curso-html-css': {
+                titulo: 'HTML & CSS',
+                conteudo: [
+                    'HTML semântico e estrutura de páginas',
+                    'CSS: seletores, box model e layout',
+                    'Flexbox e Grid',
+                    'Responsividade e boas práticas'
+                ]
+            },
+            'curso-javascript': {
+                titulo: 'JavaScript',
+                conteudo: [
+                    'Sintaxe e tipos de dados',
+                    'Manipulação do DOM',
+                    'Eventos e funções',
+                    'ES6+ e módulos'
+                ]
+            },
+            'curso-angular': {
+                titulo: 'Angular',
+                conteudo: [
+                    'Componentes e módulos',
+                    'Data binding e diretivas',
+                    'Serviços e injeção de dependência',
+                    'Roteamento e HTTP'
+                ]
+            }
+        };
+
+        const info = detailsById[courseId];
+        if (!info) return;
+
+        // Fechar quaisquer painéis de detalhes abertos em outros cards
+        coursesGrid.querySelectorAll('.course-details').forEach(el => el.remove());
+
+        const details = document.createElement('div');
+        details.className = 'course-details';
+        details.innerHTML = `
+            <div class="details-content">
+                <h4 style="margin:0 0 8px 0; color:#1f2937;">${info.titulo}</h4>
+                <ul class="details-list">
+                    ${info.conteudo.map(item => `<li>${item}</li>`).join('')}
+                </ul>
+                <div class="details-actions">
+                    <button class="btn-secondary" onclick="this.closest('.course-details').remove()">Fechar</button>
+                </div>
+            </div>
+        `;
+
+        details.style.padding = '12px';
+        details.style.border = '1px solid #e0e0e0';
+        details.style.borderRadius = '8px';
+        details.style.background = '#fafafa';
+        details.style.boxSizing = 'border-box';
+        details.style.position = 'absolute';
+        details.style.left = '12px';
+        details.style.right = '12px';
+        details.style.top = '12px';
+        details.style.bottom = '12px';
+        details.style.zIndex = '10';
+        details.style.overflowY = 'auto';
+
+        const contentEl = details.querySelector('.details-content');
+        contentEl.style.display = 'flex';
+        contentEl.style.flexDirection = 'column';
+        contentEl.style.alignItems = 'center';
+        contentEl.style.textAlign = 'center';
+        contentEl.style.gap = '10px';
+
+        const listEl = details.querySelector('.details-list');
+        listEl.style.listStyle = 'disc';
+        listEl.style.paddingLeft = '18px';
+        listEl.style.display = 'inline-block';
+        listEl.style.textAlign = 'left';
+
+        const actionsEl = details.querySelector('.details-actions');
+        actionsEl.style.display = 'flex';
+        actionsEl.style.justifyContent = 'center';
+        actionsEl.style.marginTop = '12px';
+
+        courseCard.appendChild(details);
+        courseCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
     };
 
     this.handleStartLearning = function() {
@@ -1352,7 +1492,7 @@ function EduNextApp() {
                     
                     <nav class="navbar">
                         <div class="nav-brand">
-                            <img src="src/assets/img/logofundoinvisivelazul.png" alt="Logo EduNext" class="header-logo">
+                            <img src="src/assets/img/logofundoinvisivel.png" alt="Logo EduNext" class="header-logo">
                             <span class="menu-title">EduNext</span>
                         </div>
                     </nav>
@@ -1534,7 +1674,6 @@ function EduNextApp() {
                                     <p><strong>Última atualização:</strong> Janeiro de 2024</p>
                                     <div class="terms-actions">
                                         <button onclick="window.print()" class="btn-secondary">Imprimir</button>
-                                        <button onclick="app.loadHomePage()" class="btn-primary">Voltar ao Início</button>
                                     </div>
                                 </div>
                             </div>
@@ -2029,7 +2168,8 @@ const styles = `
             transition: all 0.3s ease;
             border: 1px solid #f0f0f0;
             position: relative;
-            overflow-y: auto;
+            min-height: 260px;
+            overflow: hidden;
             text-align: center;
         }
         
@@ -4258,24 +4398,23 @@ const styles = `
 
 document.head.insertAdjacentHTML('beforeend', styles);
 
-}
-
 // Inicializar a aplicação quando o DOM estiver carregado
 document.addEventListener('DOMContentLoaded', function() {
     window.app = new EduNextApp();
     window.app.init();
 });
-    window.app.loadSettingsPage = function() {
-    const isLoggedIn = this.isLoggedIn();
-    if (!isLoggedIn) {
-        this.loadLandingPage();
-        return;
-    }
-
-    const currentUser = this.getCurrentUser();
-    const appRoot = document.querySelector('app-root');
-    if (appRoot) {
-        appRoot.innerHTML = `
+    // Garantir que métodos sejam atribuídos após a criação da instância
+    if (window.app) {
+        window.app.loadSettingsPage = function() {
+            const isLoggedIn = this.isLoggedIn();
+            if (!isLoggedIn) {
+                this.loadLandingPage();
+                return;
+            }
+            const currentUser = this.getCurrentUser();
+            const appRoot = document.querySelector('app-root');
+            if (appRoot) {
+                appRoot.innerHTML = `
             <div class="app-container modern-layout">
                 
                 <aside class="sidebar">
@@ -4391,24 +4530,27 @@ document.addEventListener('DOMContentLoaded', function() {
             </div>
         `;
 
-        // Adicionar funcionalidade do menu toggle
-        this.addSidebarToggle();
-    };
+                // Adicionar funcionalidade do menu toggle
+                this.addSidebarToggle();
+            }
+        };
+    }
 
 // Função para alternar visibilidade da sidebar
 if (window.app) {
     window.app.toggleSidebar = function() {
-    const sidebar = document.querySelector('.sidebar');
-    const mainContent = document.querySelector('.main-content-area');
-    
-    console.log('Toggle sidebar called', sidebar, mainContent);
-    
-    if (sidebar && mainContent) {
-        sidebar.classList.toggle('open');
-        mainContent.classList.toggle('with-sidebar');
-        console.log('Sidebar classes:', sidebar.className);
-        console.log('Main content classes:', mainContent.className);
-    }
+        const sidebar = document.querySelector('.sidebar');
+        const mainContent = document.querySelector('.main-content-area');
+        
+        console.log('Toggle sidebar called', sidebar, mainContent);
+        
+        if (sidebar && mainContent) {
+            sidebar.classList.toggle('open');
+            mainContent.classList.toggle('with-sidebar');
+            console.log('Sidebar classes:', sidebar.className);
+            console.log('Main content classes:', mainContent.className);
+        }
+    };
 }
 
 // Função para fechar sidebar

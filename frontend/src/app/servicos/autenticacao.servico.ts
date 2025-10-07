@@ -22,7 +22,7 @@ export interface DadosCadastro {
   providedIn: 'root'
 })
 export class AutenticacaoServico {
-  private readonly API_URL = 'http://localhost:3000/api';
+  private readonly API_URL = 'http://localhost:3002/api';
   private usuarioAtualSubject = new BehaviorSubject<Usuario | null>(null);
   private tokenSubject = new BehaviorSubject<string | null>(null);
 

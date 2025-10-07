@@ -735,7 +735,7 @@ function EduNextApp() {
 
             try {
                 // Carregar dados da API
-                const response = await fetch('http://localhost:3000/api/cursos');
+                const response = await fetch('http://localhost:3002/api/cursos');
                 const data = await response.json();
                 const cursos = data.cursos || [];
 
