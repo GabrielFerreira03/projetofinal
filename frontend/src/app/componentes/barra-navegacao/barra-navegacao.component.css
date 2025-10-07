@@ -1,0 +1,59 @@
+/* Barra de navegação simples */
+.navbar {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+}
+
+.navbar-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  height: 70px;
+}
+
+.navbar-brand {
+  display: flex;
+  align-items: center;
+}
+
+.brand-title {
+  font-size: 1.8rem;
+  font-weight: bold;
+  color: white;
+  background: linear-gradient(45deg, #fff, #f0f8ff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  .navbar-container {
+    padding: 0 0.75rem;
+    height: 60px;
+  }
+  
+  .brand-title {
+    font-size: 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .navbar-container {
+    padding: 0 0.5rem;
+    height: 55px;
+  }
+  
+  .brand-title {
+    font-size: 1.3rem;
+  }
+}

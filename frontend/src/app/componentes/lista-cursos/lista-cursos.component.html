@@ -1,0 +1,264 @@
+<div class="lista-cursos-container">
+  <!-- Cabeçalho da página -->
+  <div class="page-header">
+    <div class="header-content">
+      <h1 class="page-title">
+        <span class="title-icon">📚</span>
+        Cursos EduNext
+      </h1>
+      <p class="page-subtitle">
+        Explore nossos conteúdos formativos e desenvolva suas habilidades
+      </p>
+    </div>
+  </div>
+
+  <!-- Filtros e pesquisa -->
+  <div class="filters-section">
+    <div class="filters-container">
+      <!-- Barra de pesquisa -->
+      <div class="search-filter">
+        <div class="search-input-group">
+          <input 
+            type="text" 
+            class="search-input"
+            placeholder="Pesquisar cursos..."
+            [(ngModel)]="termoPesquisa"
+            (keydown)="onKeydownPesquisa($event)"
+          >
+          <button 
+            class="search-button" 
+            (click)="pesquisar()"
+            [disabled]="cursosCarregando"
+          >
+            <span class="search-icon">🔍</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Filtros por categoria -->
+      <div class="category-filter">
+        <h3 class="filter-title">Categorias</h3>
+        <div class="category-grid">
+          <button 
+            *ngFor="let categoria of categorias"
+            class="category-card"
+            [class.active]="categoriaAtiva === categoria.valor"
+            (click)="filtrarPorCategoria(categoria.valor)"
+            [style.border-color]="categoriaAtiva === categoria.valor ? categoria.cor : 'transparent'"
+          >
+            <div class="category-icon" [style.background-color]="categoria.cor">
+              {{ categoria.icone }}
+            </div>
+            <div class="category-info">
+              <div class="category-name">{{ categoria.nome }}</div>
+              <div class="category-description">{{ categoria.descricao }}</div>
+            </div>
+          </button>
+        </div>
+      </div>
+
+      <!-- Filtros adicionais -->
+      <div class="additional-filters">
+        <!-- Filtro por nível -->
+        <div class="filter-group">
+          <label class="filter-label">Nível</label>
+          <select 
+            class="filter-select"
+            [(ngModel)]="nivelAtivo"
+            (change)="filtrarPorNivel(nivelAtivo)"
+          >
+            <option *ngFor="let nivel of niveis" [value]="nivel.valor">
+              {{ nivel.nome }}
+            </option>
+          </select>
+        </div>
+
+        <!-- Ordenação -->
+        <div class="filter-group">
+          <label class="filter-label">Ordenar por</label>
+          <select 
+            class="filter-select"
+            [(ngModel)]="ordenacaoAtiva"
+            (change)="alterarOrdenacao(ordenacaoAtiva)"
+          >
+            <option *ngFor="let opcao of opcesOrdenacao" [value]="opcao.valor">
+              {{ opcao.nome }}
+            </option>
+          </select>
+        </div>
+
+        <!-- Botão limpar filtros -->
+        <button 
+          class="clear-filters-btn"
+          (click)="limparFiltros()"
+          [disabled]="cursosCarregando"
+        >
+          <span class="btn-icon">🗑️</span>
+          Limpar Filtros
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Resultados -->
+  <div class="results-section">
+    <!-- Informações dos resultados -->
+    <div class="results-info">
+      <div class="results-count">
+        <span *ngIf="!cursosCarregando">
+          {{ totalItens }} curso{{ totalItens !== 1 ? 's' : '' }} encontrado{{ totalItens !== 1 ? 's' : '' }}
+        </span>
+        <span *ngIf="cursosCarregando">Carregando...</span>
+      </div>
+    </div>
+
+    <!-- Loading -->
+    <div *ngIf="cursosCarregando" class="loading-container">
+      <div class="loading-spinner"></div>
+      <p class="loading-text">Carregando cursos...</p>
+    </div>
+
+    <!-- Lista de cursos -->
+    <div *ngIf="!cursosCarregando && cursos.length > 0" class="courses-grid">
+      <div 
+        *ngFor="let curso of cursos"
+        class="course-card"
+        (click)="navegarParaCurso(curso)"
+      >
+        <!-- Imagem do curso -->
+        <div class="course-image">
+          <img 
+            [src]="curso.imagemCapa || '/assets/images/curso-default.jpg'" 
+            [alt]="curso.titulo"
+            class="course-img"
+          >
+          <div class="course-category" [style.background-color]="obterCategoriaInfo(curso.categoria)?.cor">
+            {{ obterCategoriaInfo(curso.categoria)?.icone }}
+          </div>
+          <div *ngIf="curso.inscrito" class="course-enrolled">
+            <span class="enrolled-icon">✓</span>
+            Inscrito
+          </div>
+        </div>
+
+        <!-- Conteúdo do curso -->
+        <div class="course-content">
+          <div class="course-header">
+            <h3 class="course-title">{{ curso.titulo }}</h3>
+            <div class="course-level" [class]="'level-' + curso.nivel">
+              {{ curso.nivel | titlecase }}
+            </div>
+          </div>
+
+          <p class="course-description">{{ curso.descricao }}</p>
+
+          <div class="course-meta">
+            <div class="course-professor">
+              <span class="meta-icon">👨‍🏫</span>
+              {{ curso.professor.nome }}
+            </div>
+            <div class="course-duration">
+              <span class="meta-icon">⏱️</span>
+              {{ formatarDuracao(curso.duracaoTotal) }}
+            </div>
+            <div class="course-modules">
+              <span class="meta-icon">📖</span>
+              {{ curso.modulos.length }} módulo{{ curso.modulos.length !== 1 ? 's' : '' }}
+            </div>
+          </div>
+
+          <div class="course-stats">
+            <div class="course-rating">
+              <div class="stars">
+                <span 
+                  *ngFor="let estrela of obterEstrelas(curso.avaliacaoMedia)"
+                  class="star"
+                  [class.filled]="estrela === '★'"
+                >
+                  {{ estrela }}
+                </span>
+              </div>
+              <span class="rating-value">{{ curso.avaliacaoMedia.toFixed(1) }}</span>
+              <span class="rating-count">({{ curso.totalAvaliacoes }})</span>
+            </div>
+            <div class="course-students">
+              <span class="meta-icon">👥</span>
+              {{ curso.totalEstudantes }} estudante{{ curso.totalEstudantes !== 1 ? 's' : '' }}
+            </div>
+          </div>
+
+          <div class="course-footer">
+            <div class="course-price">
+              <span class="price-value" [class.free]="curso.preco === 0">
+                {{ formatarPreco(curso.preco) }}
+              </span>
+              <span *ngIf="curso.precoOriginal && curso.precoOriginal > curso.preco" class="price-original">
+                {{ formatarPreco(curso.precoOriginal) }}
+              </span>
+            </div>
+            
+            <button 
+              *ngIf="!curso.inscrito"
+              class="enroll-btn"
+              (click)="inscreverNoCurso(curso); $event.stopPropagation()"
+              [disabled]="cursosCarregando"
+            >
+              <span class="btn-icon">📚</span>
+              {{ curso.preco === 0 ? 'Inscrever-se' : 'Comprar' }}
+            </button>
+            
+            <button 
+              *ngIf="curso.inscrito"
+              class="continue-btn"
+              (click)="navegarParaCurso(curso); $event.stopPropagation()"
+            >
+              <span class="btn-icon">▶️</span>
+              Continuar
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Estado vazio -->
+    <div *ngIf="!cursosCarregando && cursos.length === 0" class="empty-state">
+      <div class="empty-icon">📚</div>
+      <h3 class="empty-title">Nenhum curso encontrado</h3>
+      <p class="empty-description">
+        Tente ajustar os filtros ou pesquisar por outros termos.
+      </p>
+      <button class="btn btn-primary" (click)="limparFiltros()">
+        <span class="btn-icon">🔄</span>
+        Limpar Filtros
+      </button>
+    </div>
+
+    <!-- Paginação -->
+    <div *ngIf="!cursosCarregando && totalPaginas > 1" class="pagination">
+      <button 
+        class="pagination-btn"
+        [disabled]="paginaAtual === 1"
+        (click)="irParaPagina(paginaAtual - 1)"
+      >
+        ← Anterior
+      </button>
+
+      <button 
+        *ngFor="let pagina of obterPaginasVisiveis()"
+        class="pagination-btn"
+        [class.active]="pagina === paginaAtual"
+        (click)="irParaPagina(pagina)"
+      >
+        {{ pagina }}
+      </button>
+
+      <button 
+        class="pagination-btn"
+        [disabled]="paginaAtual === totalPaginas"
+        (click)="irParaPagina(paginaAtual + 1)"
+      >
+        Próxima →
+      </button>
+    </div>
+  </div>
+</div>

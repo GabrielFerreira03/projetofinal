@@ -1,0 +1,352 @@
+<!-- Container principal -->
+<div class="detalhe-curso-container">
+  <!-- Loading -->
+  <div *ngIf="carregando" class="loading-container">
+    <div class="loading-spinner"></div>
+    <p class="loading-text">Carregando detalhes do curso...</p>
+  </div>
+
+  <!-- Erro -->
+  <div *ngIf="erro && !carregando" class="error-container">
+    <div class="error-icon">⚠️</div>
+    <h2 class="error-title">Ops! Algo deu errado</h2>
+    <p class="error-message">{{ erro }}</p>
+    <button class="btn btn-primary" (click)="voltarParaCursos()">
+      <span class="btn-icon">←</span>
+      Voltar aos Cursos
+    </button>
+  </div>
+
+  <!-- Conteúdo do curso -->
+  <div *ngIf="curso && !carregando" class="curso-content">
+    <!-- Cabeçalho do curso -->
+    <div class="curso-header">
+      <div class="header-background">
+        <img [src]="curso.imagemUrl" [alt]="curso.titulo" class="header-image">
+        <div class="header-overlay"></div>
+      </div>
+      
+      <div class="header-content">
+        <div class="breadcrumb">
+          <button class="breadcrumb-link" (click)="voltarParaCursos()">
+            <span class="breadcrumb-icon">←</span>
+            Cursos
+          </button>
+          <span class="breadcrumb-separator">></span>
+          <span class="breadcrumb-current">{{ curso.titulo }}</span>
+        </div>
+
+        <div class="curso-info">
+          <div class="curso-categoria">
+            <span class="categoria-icon" [style.background-color]="obterCorCategoria(curso.categoria)">
+              {{ obterIconeCategoria(curso.categoria) }}
+            </span>
+            <span class="categoria-nome">{{ curso.categoria | titlecase }}</span>
+          </div>
+
+          <h1 class="curso-titulo">{{ curso.titulo }}</h1>
+          <p class="curso-descricao">{{ curso.descricao }}</p>
+
+          <div class="curso-meta">
+            <div class="meta-item">
+              <span class="meta-icon">👨‍🏫</span>
+              <span>{{ curso.professor.nome }}</span>
+            </div>
+            <div class="meta-item">
+              <span class="meta-icon">⏱️</span>
+              <span>{{ formatarDuracao(curso.duracaoMinutos) }}</span>
+            </div>
+            <div class="meta-item">
+              <span class="meta-icon">📚</span>
+              <span>{{ curso.modulos?.length || 0 }} módulos</span>
+            </div>
+            <div class="meta-item">
+              <span class="meta-icon">🎯</span>
+              <span class="nivel-badge" [ngClass]="'nivel-' + curso.nivel">{{ curso.nivel | titlecase }}</span>
+            </div>
+          </div>
+
+          <div class="curso-stats">
+            <div class="stat-item">
+              <div class="stat-value">{{ curso.avaliacoes?.media || 0 }}</div>
+              <div class="stat-stars">
+                <span *ngFor="let estrela of gerarEstrelas(curso.avaliacoes?.media || 0)" 
+                      class="star" [class.filled]="estrela">★</span>
+              </div>
+              <div class="stat-label">({{ curso.avaliacoes?.total || 0 }} avaliações)</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-value">{{ curso.estudantesMatriculados || 0 }}</div>
+              <div class="stat-label">estudantes</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-value">{{ formatarPreco(curso.preco) }}</div>
+              <div *ngIf="curso.precoOriginal && curso.precoOriginal > curso.preco" class="stat-original">
+                {{ formatarPreco(curso.precoOriginal) }}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Barra de progresso (se matriculado) -->
+    <div *ngIf="jaMatriculado && progressoCurso" class="progress-section">
+      <div class="progress-container">
+        <div class="progress-info">
+          <h3 class="progress-title">Seu Progresso</h3>
+          <span class="progress-percentage">{{ calcularProgressoPercentual() }}%</span>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-fill" [style.width.%]="calcularProgressoPercentual()"></div>
+        </div>
+        <div class="progress-details">
+          <span>{{ progressoCurso.modulosCompletados?.filter((m: any) => m.concluido).length || 0 }} de {{ curso.modulos?.length || 0 }} módulos concluídos</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Ações principais -->
+    <div class="actions-section">
+      <div class="actions-container">
+        <div *ngIf="!jaMatriculado" class="action-group">
+          <button class="btn btn-primary btn-large" (click)="matricularNoCurso()">
+            <span class="btn-icon">🎓</span>
+            Matricular-se Agora
+          </button>
+          <p class="action-note">
+            <span class="note-icon">ℹ️</span>
+            Acesso completo a todos os módulos e materiais
+          </p>
+        </div>
+
+        <div *ngIf="jaMatriculado" class="action-group">
+          <button class="btn btn-success btn-large" (click)="continuarCurso()">
+            <span class="btn-icon">▶️</span>
+            Continuar Curso
+          </button>
+          <p class="action-note">
+            <span class="note-icon">✅</span>
+            Você está matriculado neste curso
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Conteúdo principal -->
+    <div class="main-content">
+      <!-- Módulos do curso -->
+      <div class="modules-section">
+        <h2 class="section-title">
+          <span class="title-icon">📚</span>
+          Conteúdo do Curso
+        </h2>
+
+        <div class="modules-list">
+          <div *ngFor="let modulo of curso.modulos; let i = index" class="module-card">
+            <div class="module-header" (click)="toggleModulo(modulo.id)">
+              <div class="module-info">
+                <div class="module-number">{{ i + 1 }}</div>
+                <div class="module-details">
+                  <h3 class="module-title">{{ modulo.titulo }}</h3>
+                  <p class="module-description">{{ modulo.descricao }}</p>
+                </div>
+              </div>
+              
+              <div class="module-meta">
+                <div class="module-duration">
+                  <span class="meta-icon">⏱️</span>
+                  {{ formatarDuracao(modulo.duracaoMinutos) }}
+                </div>
+                <div class="module-status" [ngClass]="'status-' + obterStatusModulo(modulo.id)">
+                  <span *ngIf="obterStatusModulo(modulo.id) === 'concluido'" class="status-icon">✅</span>
+                  <span *ngIf="obterStatusModulo(modulo.id) === 'em-progresso'" class="status-icon">🔄</span>
+                  <span *ngIf="obterStatusModulo(modulo.id) === 'nao-iniciado'" class="status-icon">⭕</span>
+                </div>
+                <div class="expand-icon" [class.expanded]="moduloExpandido === modulo.id">
+                  <span>▼</span>
+                </div>
+              </div>
+            </div>
+
+            <div *ngIf="moduloExpandido === modulo.id" class="module-content">
+              <div class="content-list">
+                <div *ngFor="let conteudo of modulo.conteudos" class="content-item">
+                  <div class="content-icon">
+                    <span *ngIf="conteudo.tipo === 'video'">🎥</span>
+                    <span *ngIf="conteudo.tipo === 'texto'">📄</span>
+                    <span *ngIf="conteudo.tipo === 'quiz'">❓</span>
+                    <span *ngIf="conteudo.tipo === 'exercicio'">💻</span>
+                  </div>
+                  <div class="content-info">
+                    <span class="content-title">{{ conteudo.titulo }}</span>
+                    <span class="content-duration">{{ formatarDuracao(conteudo.duracaoMinutos) }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sobre o professor -->
+      <div class="professor-section">
+        <h2 class="section-title">
+          <span class="title-icon">👨‍🏫</span>
+          Sobre o Professor
+        </h2>
+
+        <div class="professor-card">
+          <div class="professor-avatar">
+            <img [src]="curso.professor.avatar" [alt]="curso.professor.nome" class="avatar-image">
+          </div>
+          <div class="professor-info">
+            <h3 class="professor-name">{{ curso.professor.nome }}</h3>
+            <p class="professor-title">{{ curso.professor.titulo }}</p>
+            <p class="professor-bio">{{ curso.professor.biografia }}</p>
+            
+            <div class="professor-stats">
+              <div class="prof-stat">
+                <span class="stat-value">{{ curso.professor.cursosMinistrados || 0 }}</span>
+                <span class="stat-label">cursos</span>
+              </div>
+              <div class="prof-stat">
+                <span class="stat-value">{{ curso.professor.estudantesAlcancados || 0 }}</span>
+                <span class="stat-label">estudantes</span>
+              </div>
+              <div class="prof-stat">
+                <span class="stat-value">{{ curso.professor.avaliacaoMedia || 0 }}</span>
+                <span class="stat-label">avaliação</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Avaliações -->
+      <div class="reviews-section">
+        <div class="reviews-header">
+          <h2 class="section-title">
+            <span class="title-icon">⭐</span>
+            Avaliações dos Estudantes
+          </h2>
+          <button class="btn btn-outline" (click)="toggleAvaliacoes()">
+            <span class="btn-icon">{{ mostrarAvaliacoes ? '▲' : '▼' }}</span>
+            {{ mostrarAvaliacoes ? 'Ocultar' : 'Ver Todas' }}
+          </button>
+        </div>
+
+        <!-- Estatísticas das avaliações -->
+        <div class="reviews-stats">
+          <div class="overall-rating">
+            <div class="rating-number">{{ estatisticasAvaliacoes.media }}</div>
+            <div class="rating-stars">
+              <span *ngFor="let estrela of gerarEstrelas(Math.round(estatisticasAvaliacoes.media))" 
+                    class="star" [class.filled]="estrela">★</span>
+            </div>
+            <div class="rating-count">{{ estatisticasAvaliacoes.total }} avaliações</div>
+          </div>
+
+          <div class="rating-distribution">
+            <div *ngFor="let count of estatisticasAvaliacoes.distribuicao; let i = index" class="rating-bar">
+              <span class="bar-label">{{ 5 - i }} ★</span>
+              <div class="bar-container">
+                <div class="bar-fill" [style.width.%]="calcularPorcentagemEstrela(5 - i)"></div>
+              </div>
+              <span class="bar-count">{{ count }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Botão para avaliar -->
+        <div *ngIf="podeAvaliar() && !jaAvaliou()" class="review-action">
+          <button class="btn btn-primary" (click)="toggleFormularioAvaliacao()">
+            <span class="btn-icon">⭐</span>
+            Avaliar Curso
+          </button>
+        </div>
+
+        <!-- Formulário de avaliação -->
+        <div *ngIf="mostrarFormularioAvaliacao" class="review-form">
+          <h3 class="form-title">Sua Avaliação</h3>
+          
+          <div class="form-group">
+            <label class="form-label">Nota:</label>
+            <div class="rating-input">
+              <button *ngFor="let i of [1,2,3,4,5]" 
+                      class="star-btn" 
+                      [class.active]="i <= novaAvaliacao.nota"
+                      (click)="novaAvaliacao.nota = i">
+                ★
+              </button>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Comentário:</label>
+            <textarea class="form-textarea" 
+                      [(ngModel)]="novaAvaliacao.comentario"
+                      placeholder="Compartilhe sua experiência com este curso..."
+                      rows="4"></textarea>
+          </div>
+
+          <div class="form-group">
+            <label class="form-checkbox">
+              <input type="checkbox" [(ngModel)]="novaAvaliacao.recomenda">
+              <span class="checkbox-mark"></span>
+              Recomendo este curso
+            </label>
+          </div>
+
+          <div class="form-actions">
+            <button class="btn btn-outline" (click)="toggleFormularioAvaliacao()">
+              Cancelar
+            </button>
+            <button class="btn btn-primary" (click)="enviarAvaliacao()">
+              <span class="btn-icon">📤</span>
+              Enviar Avaliação
+            </button>
+          </div>
+        </div>
+
+        <!-- Lista de avaliações -->
+        <div *ngIf="mostrarAvaliacoes" class="reviews-list">
+          <div *ngFor="let avaliacao of avaliacoes" class="review-card">
+            <div class="review-header">
+              <div class="reviewer-info">
+                <div class="reviewer-avatar">
+                  <img [src]="avaliacao.usuario?.avatar || '/assets/default-avatar.png'" 
+                       [alt]="avaliacao.usuario?.nome" 
+                       class="avatar-image">
+                </div>
+                <div class="reviewer-details">
+                  <span class="reviewer-name">{{ avaliacao.usuario?.nome || 'Usuário' }}</span>
+                  <span class="review-date">{{ formatarData(avaliacao.dataAvaliacao) }}</span>
+                </div>
+              </div>
+              
+              <div class="review-rating">
+                <span *ngFor="let estrela of gerarEstrelas(avaliacao.nota)" 
+                      class="star" [class.filled]="estrela">★</span>
+              </div>
+            </div>
+
+            <div class="review-content">
+              <p class="review-comment">{{ avaliacao.comentario }}</p>
+              <div *ngIf="avaliacao.recomenda" class="review-recommendation">
+                <span class="recommendation-icon">👍</span>
+                <span class="recommendation-text">Recomenda este curso</span>
+              </div>
+            </div>
+          </div>
+
+          <div *ngIf="avaliacoes.length === 0" class="no-reviews">
+            <div class="no-reviews-icon">💬</div>
+            <p class="no-reviews-text">Ainda não há avaliações para este curso.</p>
+            <p class="no-reviews-subtitle">Seja o primeiro a avaliar!</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
